@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Миллионер Онлайн</title>
+  <script src="https://unpkg.com/vk-bridge/dist/browser.min.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 0; background: #f2f2f2; }
+    .game-container { max-width: 600px; margin: 20px auto; background: #fff; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding: 16px; }
+    .player-info { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .player-info img { border-radius: 50%; width: 48px; height: 48px; }
+    .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 16px 0; }
+    .cell { background: #ddd; padding: 10px; text-align: center; border-radius: 6px; position: relative; }
+    .player-token { position: absolute; bottom: 4px; right: 4px; background: red; width: 16px; height: 16px; border-radius: 50%; }
+    button { padding: 10px 16px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="player-info" id="player-info">
+      <img id="player-avatar" src="" alt="avatar">
+      <div>
+        <strong id="player-name">Игрок</strong><br>
+        Деньги: <span id="money">$1500</span>
+      </div>
+    </div>
+    <div class="board" id="board"></div>
+    <button id="roll">Бросить кубик</button>
+  </div>
+  <script>
+    let playerPosition = 0, money = 1500, boardSize = 25;
+    function updateBoard() {
+      const b = document.getElementById('board'); b.innerHTML = '';
+      for (let i=0;i<boardSize;i++){
+        const cell = document.createElement('div'); cell.className='cell'; cell.innerText=Клетка ${i+1};
+        if(i===playerPosition){
+          const t=document.createElement('div');t.className='player-token';cell.appendChild(t);
+        }
+        b.appendChild(cell);
+      }
+    }
+    document.getElementById('roll').onclick = ()=> {
+      const r=Math.floor(Math.random()*6)+1;
+      playerPosition=(playerPosition+r)%boardSize; money-=50;
+      document.getElementById('money').textContent=$${money}; updateBoard();
+    };
+    vkBridge.send('VKWebAppInit')
+      .then(()=>vkBridge.send('VKWebAppGetUserInfo'))
+      .then(data=>{
+        document.getElementById('player-name').textContent=${data.first_name} ${data.last_name};
+        document.getElementById('player-avatar').src=data.photo_200;
+      })
+      .catch(console.error);
+    updateBoard();
+  </script>
+</body>
+</html>
